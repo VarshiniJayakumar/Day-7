@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rest Countries Data</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+
+        h2 {
+            color: #333;
+        }
+
+        .country-details {
+            margin-bottom: 20px;
+            border: 1px solid #ccc;
+            padding: 10px;
+        }
+
+        .flag-img {
+            max-width: 100px;
+            max-height: 60px;
+        }
+    </style>
+</head>
+<body>
+
+    <h2>Rest Countries Data</h2>
+
+    <div id="countriesList"></div>
+    <div id="totalPopulation"></div>
+    <div id="countryUsingUSD"></div>
+
+    <script>
+        // Function to fetch data from the provided URL
+        async function fetchData(url) {
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+                return data;
+            } catch (error) {
+                console.error("Error fetching data:", error);
+            }
+        }
+
+        // Get all the countries from Asia continent/region using Filter function
+        function getCountriesInAsia(data) {
+            return data.filter(country => country.region === 'Asia');
+        }
+
+        // Get all the countries with a population of less than 2 lakhs using Filter function
+        function getCountriesWithPopulationLessThan2Lakhs(data) {
+            return data.filter(country => country.population < 200000);
+        }
+
+        // Print name, capital, and flag details using forEach function
+        function printDetailsForEach(data, containerId) {
+            const container = document.getElementById(containerId);
+            data.forEach(country => {
+                const countryDiv = document.createElement('div');
+                countryDiv.classList.add('country-details');
+                countryDiv.innerHTML = `
+                    <p>Name: ${country.name.common}</p>
+                    <p>Capital: ${country.capital}</p>
+                    <img class="flag-img" src="${country.flags.svg}" alt="${country.name.common} Flag">
+                `;
+                container.appendChild(countryDiv);
+            });
+        }
+
+        // Print the total population of countries using reduce function
+        function getTotalPopulation(data) {
+            return data.reduce((totalPopulation, country) => totalPopulation + country.population, 0);
+        }
+
+        // Print the country that uses US dollars as currency
+        function getCountryUsingUSD(data) {
+            const countryWithUSD = data.find(country => country.currencies && country.currencies.USD);
+            return countryWithUSD ? countryWithUSD.name.common : "No country uses US dollars.";
+        }
+
+        // URL for the provided data
+        const apiUrl = 'https://restcountries.com/v3.1/all';
+
+        // Fetch data and perform operations
+        fetchData(apiUrl)
+            .then(data => {
+                // Get countries in Asia
+                const countriesInAsia = getCountriesInAsia(data);
+
+                // Get countries with a population of less than 2 lakhs
+                const countriesWithPopulationLessThan2Lakhs = getCountriesWithPopulationLessThan2Lakhs(data);
+
+                // Print details using forEach function
+                printDetailsForEach(countriesInAsia, 'countriesList');
+
+                // Print total population of countries
+                const totalPopulation = getTotalPopulation(data);
+                document.getElementById('totalPopulation').innerHTML = `<p>Total population of countries: ${totalPopulation}</p>`;
+
+                // Print country that uses US dollars as currency
+                const countryUsingUSD = getCountryUsingUSD(data);
+                document.getElementById('countryUsingUSD').innerHTML = `<p>Country that uses US dollars: ${countryUsingUSD}</p>`;
+            });
+    </script>
+</body>
+</html>
